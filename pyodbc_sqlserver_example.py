@@ -9,8 +9,11 @@ Description:
 Simple example of connection to a DB by using SQLServer and Python.
 The query result is saved in an excel file.
 Dependencies:   pyodbc==5.3.0, pandas==2.3.3, openpyxl==3.1.5.
+Usega:          The sql query has the form:
+SELECT TOP 4 *
+FROM "2024-AECF_0101_Anexo4-Detalle-Percepciones"
+WHERE ReceptorRFC IN ('PEES540914FT3')
 """
-
 
 import pyodbc
 import pandas as pd
@@ -33,21 +36,24 @@ connection_string = (
 )
 
 table = "2024-AECF_0101_Anexo4-Detalle-Percepciones"
-receptor_RFC = "SSI220901JS5"
+receptor_RFC = ["PEES540914FT3"]
+# Create placeholders: "?, ?"
+placeholders = ", ".join("?" * len(receptor_RFC))
 
 query = f"""
 SELECT TOP 4 *
 FROM [{table}]
-WHERE ReceptorRFC = ?
+WHERE ReceptorRFC IN ({placeholders})
 """
+params = receptor_RFC
 
 try:
     conn = pyodbc.connect(connection_string)
     t1 = time.time()
-    df = pd.read_sql(query, conn, params=[receptor_RFC])
+    df = pd.read_sql(query, conn, params=receptor_RFC)
     print("Tiempo de consulta (pyodbc):", time.time() - t1)
     df.to_excel(f"{table}.xlsx", index=False)
-    print(f"Tabla '{table}' guardada con exito!")
+    print(f"Tabla '{table}' guardada con éxito!")
     conn.close()
 
 except Exception as e:

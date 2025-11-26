@@ -9,6 +9,10 @@ Description:
 Simple example of connection to a DB by using SQLServer, sqlalchemy and Python.
 The query result is saved in an excel file.
 Dependencies:   pyodbc==5.3.0, pandas==2.3.3, openpyxl==3.1.5, SQLAlchemy==2.0.44.
+Usega:          The sql query has the form:
+SELECT TOP 4 *
+FROM "2024-AECF_0101_Anexo4-Detalle-Percepciones"
+WHERE ReceptorRFC IN ('PEES540914FT3')
 """
 
 import pandas as pd
@@ -30,16 +34,16 @@ table = [
     "2024-AECF_0101_Anexo4-Detalle-Percepciones",
     "2024-AECF_0101_Anexo5-Detalle-Deducciones"
 ]
-receptor_RFC = 'SSI220901JS5'
+receptor_RFC = 'PEES540914FT3'
 
 query = f"""
 SELECT TOP 4 *
 FROM [{table[0]}]
 WHERE ReceptorRFC = '{receptor_RFC}'
 """
+
 t1 = time.time()
 df = pd.read_sql(query, engine)
 print("Tiempo de consulta (sqlalchemy):", time.time() - t1)
-print(df)
 df.to_excel(f"{table[0]}.xlsx", index=False)
-print(f"Tabla '{table[0]}' guardada con exito!")
+print(f"Tabla '{table[0]}' guardada con éxito!")

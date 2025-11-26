@@ -208,3 +208,6 @@ __marimo__/
 
 # Excel
 *.xlsx
+
+# CSV files
+*.csv
