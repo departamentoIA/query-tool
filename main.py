@@ -30,10 +30,11 @@ database = 'SAT-Nomina'
 username = 'caarteaga'
 password = 'Audi2025'
 
-table_list = ["2024-AECF_0101_Anexo4-Detalle-Percepciones"]
-receptor_RFC_list = ["PEES540914FT3"]
-# Create placeholders: "?, ?"
-placeholders = ", ".join("?" * len(receptor_RFC_list))
+# Set all tables and all RFCs to perform the queries
+table_list = ["2024-AECF_0101_Anexo4-Detalle-Percepciones",
+              "2024-AECF_0101_Anexo5-Detalle-Deducciones"]
+receptorRFC_list = ["PEES540914FT3"]
+
 MAX_ROWS_PER_TABLE = 6
 
 # Connection configuration
@@ -46,15 +47,20 @@ connection_string = (
     "Encrypt=no;"              # o "Encrypt=yes;TrustServerCertificate=yes;"
 )
 
-# Construct every query for every table
-queries = []
-for table in table_list:
-    query = f"""
-    SELECT TOP 10 *
-    FROM [{table}]
-    WHERE ReceptorRFC IN ({placeholders})
-    """
-    queries.append(query)
+
+def construct_queries(table_list: list, receptorRFC_list: list) -> list:
+    """Construct every query for every table"""
+    queries = []
+    # Create placeholders: "?, ?"
+    placeholders = ", ".join("?" * len(receptorRFC_list))
+    for table in table_list:
+        query = f"""
+        SELECT TOP 10 *
+        FROM [{table}]
+        WHERE ReceptorRFC IN ({placeholders})
+        """
+        queries.append(query)
+    return queries
 
 
 def split_DataFrame(table: str, df: pd.DataFrame, max_rows=600000) -> None:
@@ -77,7 +83,7 @@ def split_DataFrame(table: str, df: pd.DataFrame, max_rows=600000) -> None:
     return
 
 
-def execute_queries(table_list: list, queries: list) -> None:
+def execute_queries(conn: pyodbc.Connection, table_list: list, queries: list) -> None:
     """
     SQl queries are performed for every table in "table_list" and for every query in "queries".
     All queries are already built in "queries".
@@ -85,17 +91,23 @@ def execute_queries(table_list: list, queries: list) -> None:
     for table, query in zip(table_list, queries):
         print("Ejecutando consulta...")
         t1 = time.time()
-        df = pd.read_sql(query, conn, params=receptor_RFC_list)
+        df = pd.read_sql(query, conn, params=receptorRFC_list)
         print(f"Tiempo de consulta para la tabla '{table}':", time.time() - t1)
         split_DataFrame(table, df, MAX_ROWS_PER_TABLE)
     return
 
 
-try:
-    conn = pyodbc.connect(connection_string)
-    print(f"Conexión exitosa con la base de datos '{database}'.")
-    execute_queries(table_list, queries)
-    conn.close()
+def main():
+    try:
+        conn = pyodbc.connect(connection_string)
+        print(f"Conexión exitosa con la base de datos '{database}'.")
+        queries = construct_queries(table_list, receptorRFC_list)
+        execute_queries(conn, table_list, queries)
+        conn.close()
 
-except Exception as e:
-    print("Error al conectar o ejecutar consulta:", e)
+    except Exception as e:
+        print("Error al conectar o ejecutar consulta:", e)
+
+
+if __name__ == "__main__":
+    main()
