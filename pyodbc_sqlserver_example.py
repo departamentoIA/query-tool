@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-File:           sqlserver_connection_example.py
+File:           pyodbc_sqlserver_example.py
 Author:         Antonio Arteaga
 Last Updated:   2025-11-26
 Version:        1.0
@@ -14,6 +14,7 @@ Dependencies:   pyodbc==5.3.0, pandas==2.3.3, openpyxl==3.1.5.
 
 import pyodbc
 import pandas as pd
+import time
 
 # Connection parameters
 server = '10.0.14.27\\PRODMIXTIC2022,6538'
@@ -37,13 +38,16 @@ receptor_RFC = "SSI220901JS5"
 query = f"""
 SELECT TOP 4 *
 FROM [{table}]
+WHERE ReceptorRFC = ?
 """
 
 try:
     conn = pyodbc.connect(connection_string)
-    df = pd.read_sql(query, conn)
-    df.to_excel("resultado.xlsx", index=False)
-    print(f"Tabla guardada con exito!")
+    t1 = time.time()
+    df = pd.read_sql(query, conn, params=[receptor_RFC])
+    print("Tiempo de consulta (pyodbc):", time.time() - t1)
+    df.to_excel(f"{table}.xlsx", index=False)
+    print(f"Tabla '{table}' guardada con exito!")
     conn.close()
 
 except Exception as e:

@@ -6,13 +6,14 @@ Connection to a DB by using SQLServer and Python
 ```
 git clone https://github.com/departamentoIA/query-tool.git
 ```
-2. Set virtual environment and install dependencies (Windows):
+2. Set virtual environment and install dependencies.
+For Windows:
 ```
 python3 -m venv env
 env/Scripts/activate
 pip3 install -r requirements.txt
 ```
-Set virtual environment and install dependencies (Linux):
+For Linux:
 ```
 python3 -m venv env && source env/bin/activate && pip3 install -r requirements.txt
 ```
