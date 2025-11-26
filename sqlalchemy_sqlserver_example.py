@@ -8,8 +8,8 @@ Version:        1.0
 Description:
 Simple example of connection to a DB by using SQLServer, sqlalchemy and Python.
 The query result is saved in an excel file.
-Dependencies:   pyodbc==5.3.0, pandas==2.3.3, openpyxl==3.1.5, SQLAlchemy==2.0.44.
-Usega:          The sql query has the form:
+Dependencies:   pandas==2.3.3, openpyxl==3.1.5, SQLAlchemy==2.0.44.
+Usage:          The sql query has the form:
 SELECT TOP 4 *
 FROM "2024-AECF_0101_Anexo4-Detalle-Percepciones"
 WHERE ReceptorRFC IN ('PEES540914FT3')
