@@ -21,21 +21,21 @@ import time
 import math
 import warnings
 
-# To ignore all warnings
-warnings.filterwarnings("ignore")
-
-# Connection parameters
+# Set Connection parameters
 server = '10.0.14.27\\PRODMIXTIC2022,6538'
 database = 'SAT-Nomina'
 username = 'caarteaga'
 password = 'Audi2025'
 
 # Set all tables and all RFCs to perform the queries
-table_list = ["2024-AECF_0101_Anexo4-Detalle-Percepciones",
-              "2024-AECF_0101_Anexo5-Detalle-Deducciones"]
-receptorRFC_list = ["PEES540914FT3"]
+percepciones_table = "2024-AECF_0101_Anexo4-Detalle-Percepciones"
+deducciones_table = "2024-AECF_0101_Anexo5-Detalle-Deducciones"
+receptorRFC_list = ["SSI220901JS5"]
+report_name = "Reporte de los datos.xlsx"
+MAX_ROWS_PER_TABLE = 6              # Maximum number of rows per excel file
 
-MAX_ROWS_PER_TABLE = 6
+table_list = [percepciones_table,
+              deducciones_table]
 
 # Connection configuration
 connection_string = (
@@ -44,8 +44,11 @@ connection_string = (
     f"DATABASE={database};"
     f"UID={username};"
     f"PWD={password};"
-    "Encrypt=no;"              # o "Encrypt=yes;TrustServerCertificate=yes;"
+    "Encrypt=no;"                   # or "Encrypt=yes;TrustServerCertificate=yes;"
 )
+
+# To ignore all warnings
+warnings.filterwarnings("ignore")
 
 
 def construct_queries(table_list: list, receptorRFC_list: list) -> list:
@@ -63,6 +66,14 @@ def construct_queries(table_list: list, receptorRFC_list: list) -> list:
     return queries
 
 
+def value_count_in_column(col_name: str, df: pd.DataFrame) -> list:
+    """Calculate all different values in a column and return a list with all values."""
+    col_name_values = []
+    if col_name in df.columns:
+        col_name_values = df[col_name].unique()
+    return col_name_values
+
+
 def split_DataFrame(table: str, df: pd.DataFrame, max_rows=600000) -> None:
     """Split every DataFrame and save it in different excel files,
     if it has more that 600,000 rows."""
@@ -78,22 +89,50 @@ def split_DataFrame(table: str, df: pd.DataFrame, max_rows=600000) -> None:
         df_part = df.iloc[inicio:fin]
         file_name = f"{table}_part_{i+1}.xlsx"
         df_part.to_excel(file_name, index=False)
-
     print(f"Tabla '{table}' guardada con éxito!\n")
-    return
+
+
+def save_lists_as_DataFrame(report_name: str, percepcion_values: list, deduccion_values: list) -> None:
+    """Create a DataFrame with the entry lists and save it in an excel file."""
+    # Fill the shortest list
+    max_len = max(len(percepcion_values), len(deduccion_values))
+    print(max_len)
+    percepcion = percepcion_values + [None] * \
+        (max_len - len(percepcion_values))
+    deduccion = deduccion_values + [None] * (max_len - len(deduccion_values))
+
+    df = pd.DataFrame({"Percepcion_Valores": percepcion,
+                      "Deduccion_Valores": deduccion})
+    print(percepcion)
+    print(deduccion)
+    print(df)
+    df.to_excel(report_name, index=False)
 
 
 def execute_queries(conn: pyodbc.Connection, table_list: list, queries: list) -> None:
     """
-    SQl queries are performed for every table in "table_list" and for every query in "queries".
+    SQl queries are performed for every table in "table_list" and for every query.
     All queries are already built in "queries".
     """
+    percepcionClave_values = []
+    deduccionClave_values = []
     for table, query in zip(table_list, queries):
         print("Ejecutando consulta...")
         t1 = time.time()
         df = pd.read_sql(query, conn, params=receptorRFC_list)
         print(f"Tiempo de consulta para la tabla '{table}':", time.time() - t1)
+        # Analize the data, this part can be ommited -------
+        if table == percepciones_table:
+            percepcionClave_values = value_count_in_column(
+                "PercepcionClave", df)
+        if table == deducciones_table:
+            deduccionClave_values = value_count_in_column("DeduccionClave", df)
+        # End of data analysis------------------------------
         split_DataFrame(table, df, MAX_ROWS_PER_TABLE)
+    print(f"Valores diferentes de percepcion = {percepcionClave_values}")
+    print(f"Valores diferentes de deduccion= {deduccionClave_values}")
+    save_lists_as_DataFrame(
+        report_name, percepcionClave_values, deduccionClave_values)
     return
 
 
