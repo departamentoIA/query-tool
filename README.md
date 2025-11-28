@@ -1,6 +1,19 @@
 # query-tool
 Connection to a DB by using SQLServer and Python.
 
+## Structure
+```
+mi_proyecto/
+│
+├── main.py
+├── .gitignore
+├── env/             # Virtual enviroment
+└── requirements.txt
+└── pkg                 # Contains all nedded files
+    └── config.py       # Contains all configuration params
+```
+
+
 ## Details
 The files "sqlalchemy_sqlserver_example.py" and "pyodbc_sqlserver_example.py" are simple examples to connect to the database by using the libraries "sqlalchemy" and "pyodbc", respectively.
 
