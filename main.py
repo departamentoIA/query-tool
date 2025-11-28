@@ -4,11 +4,11 @@
 File:           main.py
 Author:         Antonio Arteaga
 Last Updated:   2025-11-28
-Version:        1.0
+Version:        2.0
 Description:
 Connection to a SQLServer DB for 5 tables and multiple values in column 'ReceptorRFC'.
 The query result for every table is saved in an excel file (or multiple excel files).
-Dependencies:   pyodbc==5.3.0, pandas==2.3.3, openpyxl==3.1.5.
+Dependencies:   pyodbc==5.3.0, pandas==2.3.3, openpyxl==3.1.5, python-dotenv==1.2.1.
 Usage:          Every sql query has the form:
 SELECT TOP 10 *
 FROM "2024-AECF_0101_Anexo4-Detalle-Percepciones"
@@ -20,32 +20,26 @@ import pandas as pd
 import time
 import math
 import warnings
-
-# Connection parameters
-server = '10.0.14.27\\PRODMIXTIC2022,6538'
-database = 'SAT-Nomina'
-username = 'caarteaga'
-password = 'Audi2025'
+from config import DB_CONFIG
 
 # All tables and all RFCs to perform the queries
 percepciones_table = "2024-AECF_0101_Anexo4-Detalle-Percepciones"
 deducciones_table = "2024-AECF_0101_Anexo5-Detalle-Deducciones"
 receptorRFC_list = ["PEES540914FT3"]
-report_name = "Reporte de los datos.xlsx"
+# report_name = "Reporte de los datos.xlsx"
 log_file = "Valores en percepciones y deducciones.txt"
 MAX_ROWS_PER_TABLE = 6              # Maximum number of rows per excel file
 
-table_list = [percepciones_table,
-              deducciones_table]
+table_list = [percepciones_table]
 
-# Connection configuration
-connection_string = (
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    f"SERVER={server};"
-    f"DATABASE={database};"
-    f"UID={username};"
-    f"PWD={password};"
-    "Encrypt=no;"                   # or "Encrypt=yes;TrustServerCertificate=yes;"
+conn_str = (
+    f"DRIVER={DB_CONFIG['driver']};"
+    f"SERVER={DB_CONFIG['server']};"
+    f"DATABASE={DB_CONFIG['database']};"
+    f"UID={DB_CONFIG['username']};"
+    f"PWD={DB_CONFIG['password']};"
+    "Encrypt=yes;"
+    "TrustServerCertificate=yes;"
 )
 
 # To ignore all warnings
@@ -114,8 +108,8 @@ def execute_queries(conn: pyodbc.Connection, table_list: list[str], queries: lis
 
 def main():
     try:
-        conn = pyodbc.connect(connection_string)
-        print(f"Conexión exitosa con la base de datos '{database}'.")
+        conn = pyodbc.connect(conn_str)
+        print(f"Conexión exitosa con la DB '{DB_CONFIG['database']}'.")
         queries = construct_queries(table_list, receptorRFC_list)
         execute_queries(conn, table_list, queries)
         conn.close()
