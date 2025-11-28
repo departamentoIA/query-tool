@@ -35,14 +35,14 @@ connection_string = (
     "Encrypt=no;"              # o "Encrypt=yes;TrustServerCertificate=yes;"
 )
 
-table = "2024-AECF_0101_Anexo4-Detalle-Percepciones"
+table = ["2024-AECF_0101_Anexo4-Detalle-Percepciones"]
 receptor_RFC = ["PEES540914FT3"]
 # Create placeholders: "?, ?"
 placeholders = ", ".join("?" * len(receptor_RFC))
 
 query = f"""
 SELECT TOP 4 *
-FROM [{table}]
+FROM [{table[0]}]
 WHERE ReceptorRFC IN ({placeholders})
 """
 params = receptor_RFC
