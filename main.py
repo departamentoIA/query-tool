@@ -11,10 +11,9 @@ The query result for every table is saved in an excel file (or multiple excel fi
 Dependencies:   pyodbc==5.3.0, pandas==2.3.3, openpyxl==3.1.5, python-dotenv==1.2.1.
 Usage:          Every sql query has the form:
 SELECT TOP 10 *
-FROM "2024-AECF_0101_Anexo4-Detalle-Percepciones"
-WHERE ReceptorRFC IN ('PEES540914FT3')
+FROM dbo.[2024-AECF_0101_Anexo4-Detalle-Percepciones]
+WHERE EmisorRFC IN ('IMS421231I45','ISC091217HC7')
 """
-
 
 from pkg.modules import *
 
@@ -25,6 +24,7 @@ def main():
         print(f"Conexión exitosa con la DB '{DB_CONFIG['database']}'.")
         queries = construct_queries(table_list, receptorRFC_list)
         execute_queries(conn, table_list, queries)
+
         conn.close()
 
     except Exception as e:

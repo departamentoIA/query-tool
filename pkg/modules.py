@@ -1,5 +1,6 @@
 # modules.py
 from pkg.settings import *
+import os
 
 
 def construct_queries(table_list: list[str], receptorRFC_list: list[str]) -> list[str]:
@@ -11,7 +12,7 @@ def construct_queries(table_list: list[str], receptorRFC_list: list[str]) -> lis
         query = f"""
         SELECT TOP 10 *
         FROM [{table}]
-        WHERE ReceptorRFC IN ({placeholders})
+        WHERE EmisorRFC IN ({placeholders})
         """
         queries.append(query)
     return queries
@@ -31,27 +32,33 @@ def split_DataFrame(table: str, df: pd.DataFrame, max_rows=600000) -> None:
         fin = inicio + max_rows
         df_part = df.iloc[inicio:fin]
         file_name = f"{table}_part_{i+1}.xlsx"
-        df_part.to_excel(file_name, index=False)
+        destination_path = os.path.join(os.getcwd(), path_results, file_name)
+        df_part.to_excel(destination_path, index=False)
     print(f"Tabla '{table}' guardada con éxito!\n")
 
 
 def execute_queries(conn: pyodbc.Connection, table_list: list[str], queries: list[str]) -> None:
     """
     SQl queries are performed for every table in "table_list" and for every query.
-    All queries are already built in "queries".
+    All queries are already built in "queries". All DataFrames are saved.
     """
     percepcionClave_values = []
     deduccionClave_values = []
+    print("Se procede a ejecutar las consultas en las tablas 'Detalle-Percepciones' y 'Detalle-Deducciones'"
+          + "después se creará un archivo txt con los diferentes valores encontrados en las columnas"
+          + "'percepcionClave' y 'deduccionClave' de las tablas antes mencionadas.")
     for table, query in zip(table_list, queries):
         print("Ejecutando consulta...")
         t1 = time.time()
         df = pd.read_sql(query, conn, params=receptorRFC_list)
-        print(f"Tiempo de consulta para la tabla '{table}':", time.time() - t1)
+        print(f"Tiempo de consulta para la tabla '{table}':", int(
+            time.time() - t1), "segundos.")
         # Analize the data, this part can be ommited -------
         if table == percepciones_table:
             percepcionClave_values = df['PercepcionClave'].unique()
         if table == deducciones_table:
             deduccionClave_values = df['DeduccionClave'].unique()
+            print("Puede abrir la otra herramienta 'pivot_table.exe'")
         # End of data analysis------------------------------
         split_DataFrame(table, df, MAX_ROWS_PER_TABLE)
 
