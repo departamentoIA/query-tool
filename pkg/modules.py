@@ -10,7 +10,7 @@ def construct_queries(table_list: list[str], receptorRFC_list: list[str]) -> lis
     placeholders = ", ".join("?" * len(receptorRFC_list))
     for table in table_list:
         query = f"""
-        SELECT TOP 100000 *
+        SELECT TOP 1000 *
         FROM [{table}]
         WHERE EmisorRFC IN ({placeholders})
         """
@@ -51,6 +51,7 @@ def execute_queries(conn: pyodbc.Connection, table_list: list[str], queries: lis
         df = pd.read_sql(query, conn, params=receptorRFC_list)
         print(f"Tiempo de consulta para la tabla '{table}':", int(
             time.time() - t1), "segundos.")
+        print("Guardando tabla, espere por favor...")
         # Save the complete DataFrames, this part can be ommited -------
         if table == percepciones_table:
             destination_path = os.path.join(
@@ -66,7 +67,7 @@ def execute_queries(conn: pyodbc.Connection, table_list: list[str], queries: lis
 
 def load_excel(path: str, table: str) -> pd.DataFrame:
     """Read DataFrame from an excel file."""
-    full_path = os.path.join(path, table+".xlsx")
+    full_path = os.path.join(os.getcwd(), path, table+".xlsx")
     df = pd.read_excel(full_path)
     return df
 

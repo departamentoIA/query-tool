@@ -12,7 +12,7 @@ percepciones_table = "2024-AECF_0101_Anexo4-Detalle-Percepciones"
 deducciones_table = "2024-AECF_0101_Anexo5-Detalle-Deducciones"
 log_file = "Valores en percepciones y deducciones.txt"
 path_results = "archivos"
-catalogo_excel = "Catalogo_APF_RFCs"
+catalogo_excel = "catalogo"
 MAX_ROWS_PER_TABLE = 600_000              # Maximum number of rows per excel file
 # Maximum number of different values in columns 'percepcionClave' or 'deduconClave'
 MAX_COLUMN_VALS = 40
