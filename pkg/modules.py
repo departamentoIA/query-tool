@@ -10,7 +10,7 @@ def construct_queries(table_list: list[str], receptorRFC_list: list[str]) -> lis
     placeholders = ", ".join("?" * len(receptorRFC_list))
     for table in table_list:
         query = f"""
-        SELECT TOP 10 *
+        SELECT TOP 100000 *
         FROM [{table}]
         WHERE EmisorRFC IN ({placeholders})
         """
@@ -51,7 +51,7 @@ def execute_queries(conn: pyodbc.Connection, table_list: list[str], queries: lis
         df = pd.read_sql(query, conn, params=receptorRFC_list)
         print(f"Tiempo de consulta para la tabla '{table}':", int(
             time.time() - t1), "segundos.")
-        # Analize the data, this part can be ommited -------
+        # Save the complete DataFrames, this part can be ommited -------
         if table == percepciones_table:
             destination_path = os.path.join(
                 os.getcwd(), path_results, percepciones_table+".xlsx")
@@ -60,17 +60,8 @@ def execute_queries(conn: pyodbc.Connection, table_list: list[str], queries: lis
             destination_path = os.path.join(
                 os.getcwd(), path_results, deducciones_table+".xlsx")
             df.to_excel(destination_path, index=False)
-        # End of data analysis------------------------------
+        # End of data analysis------------------------------------------
         split_DataFrame(table, df, MAX_ROWS_PER_TABLE)
-
-
-'''
-    with open(log_file, "w", encoding="utf-8") as f:
-        f.write(
-            f"{len(percepcionClave_values)} Valores diferentes de percepcionClave:\n{percepcionClave_values}\n")
-        f.write(
-            f"{len(deduccionClave_values)} Valores diferentes de deduccionClave:\n{deduccionClave_values}\n")
-'''
 
 
 def load_excel(path: str, table: str) -> pd.DataFrame:
@@ -82,7 +73,7 @@ def load_excel(path: str, table: str) -> pd.DataFrame:
 
 def open_DataFrame(path_results: str, excel_file: str) -> pd.DataFrame:
     """
-    Read DataFrame from excel file name without '.xlsx'.
+    Read DataFrame from excel file, the name without '.xlsx'.
     """
     try:
         df = load_excel(path_results, excel_file)
