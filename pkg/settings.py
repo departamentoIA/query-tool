@@ -12,14 +12,16 @@ percepciones_table = "2024-AECF_0101_Anexo4-Detalle-Percepciones"
 deducciones_table = "2024-AECF_0101_Anexo5-Detalle-Deducciones"
 log_file = "Valores en percepciones y deducciones.txt"
 path_results = "archivos"
-# catalogo_excel = "catalogo.xlsx"
+catalogo_excel = "Catalogo_APF_RFCs"
 MAX_ROWS_PER_TABLE = 6              # Maximum number of rows per excel file
+# Maximum number of different values in columns 'percepcionClave' or 'deduconClave'
+MAX_COLUMN_VALS = 50
+
 receptorRFC_list = input(
     "Escriba los RFCs separados por coma para las consultas: ")
 receptorRFC_list = receptorRFC_list.split(",")
 # receptorRFC_list = ["IMS421231I45"]
-
-table_list = [percepciones_table]
+table_list = [percepciones_table, deducciones_table]
 
 conn_str = (
     f"DRIVER={DB_CONFIG['driver']};"

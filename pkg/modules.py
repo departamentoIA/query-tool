@@ -42,8 +42,6 @@ def execute_queries(conn: pyodbc.Connection, table_list: list[str], queries: lis
     SQl queries are performed for every table in "table_list" and for every query.
     All queries are already built in "queries". All DataFrames are saved.
     """
-    percepcionClave_values = []
-    deduccionClave_values = []
     print("Se procede a ejecutar las consultas en las tablas 'Detalle-Percepciones' y 'Detalle-Deducciones'"
           + "después se creará un archivo txt con los diferentes valores encontrados en las columnas"
           + "'percepcionClave' y 'deduccionClave' de las tablas antes mencionadas.")
@@ -55,15 +53,39 @@ def execute_queries(conn: pyodbc.Connection, table_list: list[str], queries: lis
             time.time() - t1), "segundos.")
         # Analize the data, this part can be ommited -------
         if table == percepciones_table:
-            percepcionClave_values = df['PercepcionClave'].unique()
+            destination_path = os.path.join(
+                os.getcwd(), path_results, percepciones_table+".xlsx")
+            df.to_excel(destination_path, index=False)
         if table == deducciones_table:
-            deduccionClave_values = df['DeduccionClave'].unique()
-            print("Puede abrir la otra herramienta 'pivot_table.exe'")
+            destination_path = os.path.join(
+                os.getcwd(), path_results, deducciones_table+".xlsx")
+            df.to_excel(destination_path, index=False)
         # End of data analysis------------------------------
         split_DataFrame(table, df, MAX_ROWS_PER_TABLE)
 
+
+'''
     with open(log_file, "w", encoding="utf-8") as f:
         f.write(
             f"{len(percepcionClave_values)} Valores diferentes de percepcionClave:\n{percepcionClave_values}\n")
         f.write(
             f"{len(deduccionClave_values)} Valores diferentes de deduccionClave:\n{deduccionClave_values}\n")
+'''
+
+
+def load_excel(path: str, table: str) -> pd.DataFrame:
+    """Read DataFrame from an excel file."""
+    full_path = os.path.join(path, table+".xlsx")
+    df = pd.read_excel(full_path)
+    return df
+
+
+def open_DataFrame(path_results: str, excel_file: str) -> pd.DataFrame:
+    """
+    Read DataFrame from excel file name without '.xlsx'.
+    """
+    try:
+        df = load_excel(path_results, excel_file)
+        return df
+    except:
+        print(f"Archivo '{excel_file+".xlsx"}' no encontrado")
