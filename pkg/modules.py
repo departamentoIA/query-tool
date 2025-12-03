@@ -10,7 +10,7 @@ def construct_queries(table_list: list[str], receptorRFC_list: list[str]) -> lis
     placeholders = ", ".join("?" * len(receptorRFC_list))
     for table in table_list:
         query = f"""
-        SELECT TOP 1000 *
+        SELECT TOP 10 *
         FROM [{table}]
         WHERE EmisorRFC IN ({placeholders})
         """

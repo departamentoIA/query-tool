@@ -36,7 +36,7 @@ conn_str = (
     f"DATABASE={DB_CONFIG['database']};"
     f"UID={DB_CONFIG['username']};"
     f"PWD={DB_CONFIG['password']};"
-    "Encrypt=yes;"
+    "Encrypt=no;"
     "TrustServerCertificate=yes;"
 )
 
