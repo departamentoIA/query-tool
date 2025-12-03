@@ -10,9 +10,13 @@ Connection to a SQLServer DB for 5 tables and multiple values in column 'Recepto
 The query result for every table is saved in an excel file (or multiple excel files).
 Dependencies:   pyodbc==5.3.0, pandas==2.3.3, openpyxl==3.1.5, python-dotenv==1.2.1.
 Usage:          Every sql query has the form:
+----
 SELECT TOP 10 *
 FROM dbo.[2024-AECF_0101_Anexo4-Detalle-Percepciones]
 WHERE EmisorRFC IN ('IMS421231I45','ISC091217HC7','SSI220901JS5')
+----
+Portability:    To make this project executable, use the line:
+pyinstaller --onefile --add-data "pkg/.env;pkg" main.py
 """
 
 from pkg.modules import *
